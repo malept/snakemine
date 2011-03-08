@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+
+
+class Dispatcher(object):
+
+    def __init__(self, args):
+        self._args = args
+        print args
+
+    @property
+    def object_type(self):
+        return getattr(self, '_get_%s_object' % self._args.item_type)()
+
+    def run(self):
+        getattr(self, '_run_%s_%s' % (self._args.item_type, self._args.action_name))()
+        return 0
+
+    def _get_issue_object(self):
+        from snakemine.issue import Issue
+        return Issue
+
+    def _run_issue_get(self):
+        print self.object_type.objects.get(self._args.issue_number)
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description='Interact with Redmine from the command line.')
+    subparsers = parser.add_subparsers(dest='item_type')
+    parser_issue = subparsers.add_parser('issue', help='Handles issue commands')
+    issue_subparsers = parser_issue.add_subparsers(dest='action_name')
+    parser_issue_get = issue_subparsers.add_parser('get', help='Retrieve an issue')
+    parser_issue_get.add_argument('issue_number', metavar='ISSUE', type=int, help='The issue number')
+    parser_project = subparsers.add_parser('project', help='Handles project commands')
+    return Dispatcher(parser.parse_args(argv[1:])).run()
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
