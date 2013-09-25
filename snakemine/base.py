@@ -40,3 +40,6 @@ class Resource(object):
 
     def __getattr__(self, key):
         return getattr(self._response, key)
+
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and self.id == other.id
