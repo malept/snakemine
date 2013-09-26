@@ -12,9 +12,9 @@ from datetime import date, datetime
 from dateutil.parser import parse
 from decimal import Decimal
 try:
-    import json
-except ImportError:
     import simplejson as json
+except ImportError:
+    import json
 
 DATE_FIELDS = [
     'due_date',
@@ -58,13 +58,12 @@ class Request(base.Request):
     _format = 'json'
 
     def _send(self, method, path, params={}, data=None):
-        response, content = self._send_request(method, path, params=params,
-                                               data=data)
+        response = self._send_request(method, path, params=params, data=data)
         result = None
-        if response['status'] == '200':
-            result = json.loads(content, object_hook=deserialize_json,
+        if response.status_code == 200:
+            result = json.loads(response.text, object_hook=deserialize_json,
                                 parse_float=Decimal)
-        return response['status'], result
+        return response.status_code, result
 
     def post_object(self, path, data):
         return self.post(path, data=json.dumps(data, cls=JSONEncoder))

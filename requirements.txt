@@ -1,4 +1,4 @@
 argparse
-httplib2
 lxml
 python-dateutil
+requests

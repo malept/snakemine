@@ -25,11 +25,10 @@ class Request(base.Request):
     _format = 'xml'
 
     def _send(self, method, path, params={}, data=None):
-        response, content = self._send_request(method, path, params=params,
-                                               data=data)
+        response = self._send_request(method, path, params=params, data=data)
         result = None
-        if response['status'] == '200':
-            xml = objectify.fromstring(content)
+        if response.status_code == 200:
+            xml = objectify.fromstring(response.text.encode('utf-8'))
             #print objectify.dump(xml)
             result = []
             if xml.tag == 'issues':
@@ -38,4 +37,4 @@ class Request(base.Request):
             elif xml.tag == 'issue':
                 result.append(Response(xml))
             #print etree.tostring(xml, pretty_print=True)
-        return response['status'], result
+        return response.status_code, result
