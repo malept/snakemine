@@ -15,6 +15,7 @@ class Comment(object):
 
 class Person(object):
     people = {}
+
     def __init__(self, person):
         self._person = person
 

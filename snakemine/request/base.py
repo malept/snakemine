@@ -6,7 +6,6 @@ Base HTTP Request handler.
 '''
 
 import requests
-import urllib
 
 
 class Request(object):

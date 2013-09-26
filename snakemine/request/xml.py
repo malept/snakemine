@@ -9,7 +9,8 @@ from . import base
 from ..response.xml import Response
 from lxml import objectify
 
-#TODO see http://codespeak.net/svn/lxml/trunk/doc/s5/ep2008/atom.py for pointers on element class lookup and custom element classes
+# TODO see http://codespeak.net/svn/lxml/trunk/doc/s5/ep2008/atom.py for
+# TODO pointers on element class lookup and custom element classes
 
 
 class Date():
