@@ -8,9 +8,20 @@ class Comment(object):
     def __getattr__(self, key):
         return getattr(self._journal, key)
 
+    def __repr__(self):
+        return '<%s: %d by "%s [%s]">' % \
+               (self.__class__.__name__, self.id, self.user.name, self.user.id)
+
+    def __str__(self):
+        return str(self._journal.notes)
+
     @property
     def id(self):
-        return self._journal.attrib['id']
+        return int(self._journal.attrib['id'])
+
+    @property
+    def user(self):
+        return Person.get(self._journal.user)
 
 
 class Person(object):
