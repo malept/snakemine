@@ -47,6 +47,17 @@ else
 fi
 
 script/server --daemon --binding=127.0.0.1
-sleep 5 # make sure the stupid server is ready to accept connections
+# make sure the stupid server is ready to accept connections before running tests
+echo 'Waiting for Redmine to be responsive...'
+while true; do
+    if [[ $(curl -q http://127.0.0.1:3000 2> /dev/null > /dev/null; echo $?) == 0 ]]; then
+        echo
+        echo 'Starting tests...'
+        break
+    else
+        echo -n .
+    fi
+    sleep 1
+done
 (cd "$BASE_DIR"/.. && coverage run -m unittest discover; coverage report -m)
 kill -9 `cat tmp/pids/server.pid`
