@@ -13,7 +13,7 @@ class Manager(object):
     '''A Django-like model manager for Redmine resources.'''
 
     def __init__(self):
-        self._request = Request('http://localhost:3000', 'jsmith', 'jsmith')
+        self._request = Request('http://127.0.0.1:3000', 'jsmith', 'jsmith')
 
     def _get(self, path=None, params={}):
         if not path:
