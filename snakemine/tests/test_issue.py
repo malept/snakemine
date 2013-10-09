@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from snakemine.issue import Issue
@@ -40,10 +39,10 @@ class IssueTest(TestCase):
         self.assertTrue(hasattr(issue2, 'comments'))
         self.assertEqual(1, len(issue2.comments))
 
-    # def test_attr_project(self):
-    #     issue = Issue.objects.get(1)
-    #     project = issue.project
-    #     self.assertIsNotNone(project)
+    def test_attr_project(self):
+        issue = Issue.objects.get(1)
+        project = issue.project
+        self.assertIsNotNone(project)
 
     def test_attr_parent(self):
         child = Issue.objects.get(14)

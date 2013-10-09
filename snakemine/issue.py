@@ -6,6 +6,7 @@ Handling of Redmine issues.
 '''
 
 from .base import Manager, Resource
+from .project import Project
 # TODO Django-like settings handling
 
 
@@ -35,11 +36,11 @@ class Issue(Resource):
 
     @property
     def project(self):
-        if self.project_id:
-            from .project import Project
-            return Project.objects.get(self.project_id)
-        else:
-            return None
+        '''
+        A project relation is required on an Issue, so there is no check to see
+        if ``project_id`` exists.
+        '''
+        return Project.objects.get(self.project_id)
 
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.id)

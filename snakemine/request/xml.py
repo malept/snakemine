@@ -37,5 +37,10 @@ class Request(base.Request):
                     result.append(Response(issue))
             elif xml.tag == 'issue':
                 result.append(Response(xml))
+            elif xml.tag == 'projects':
+                for project in list(xml.project):
+                    result.append(Response(project))
+            elif xml.tag == 'project':
+                result.append(Response(xml))
             #print etree.tostring(xml, pretty_print=True)
         return response.status_code, result
