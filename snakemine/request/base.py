@@ -34,6 +34,8 @@ class Request(object):
             if self._api_key:
                 self.password = 'unused'
             self._auth = (self._username, self._password)
+        else:
+            self._auth = None
 
     def _send_request(self, method, path, params={}, data=None):
         uri = '%s%s.%s' % (self._base_uri, path, self._format)
