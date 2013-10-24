@@ -73,5 +73,9 @@ while true; do
     fi
     sleep 1
 done
-(cd "$BASE_DIR"/.. && coverage run -m unittest discover; coverage report -m)
+(
+    cd "$BASE_DIR"/..
+    PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" coverage run -m unittest discover
+    coverage report -m
+)
 kill -9 `cat tmp/pids/server.pid`

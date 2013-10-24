@@ -21,7 +21,6 @@ Handling of Redmine issues.
 
 from .base import Manager, Resource
 from .project import Project
-# TODO Django-like settings handling
 
 
 class IssueManager(Manager):
