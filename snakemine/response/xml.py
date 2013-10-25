@@ -18,11 +18,8 @@ from . import base
 
 
 class Person(base.Person):
-    def __init__(self, person):
-        self._person = person
-
     def __getattr__(self, key):
-        return self._person.attrib[key]
+        return self._data.attrib[key]
 
 
 class Comment(base.Comment):
@@ -44,23 +41,19 @@ class Comment(base.Comment):
         return Person.get(self._journal.user)
 
 
-class Response(object):
-    def __init__(self, xml):
-        self._xml = xml
+class Response(base.Response):
+    person_cls = Person
 
     def __getattr__(self, key):
-        return getattr(self._xml, key)
-
-    def _get_person(self, person):
-        return Person.get(person)
+        return getattr(self._data, key)
 
     @property
     def assigned_to(self):
-        return self._get_person(self._xml.assigned_to)
+        return self._get_person(self._data.assigned_to)
 
     @property
     def author(self):
-        return self._get_person(self._xml.author)
+        return self._get_person(self._data.author)
 
     @property
     def parent_id(self):

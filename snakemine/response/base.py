@@ -15,7 +15,15 @@
 # limitations under the License.
 
 
-class Person(object):
+class Response(object):
+    def __init__(self, data):
+        self._data = data
+
+    def _get_person(self, person):
+        return self.person_cls.get(person)
+
+
+class Person(Response):
     people = {}
 
     @classmethod

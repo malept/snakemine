@@ -19,6 +19,8 @@ Base for Redmine models.
 .. moduleauthor:: Mark Lee <snakemine@lazymalevolence.com>
 '''
 
+# This is XML because the JSON response doesn't send back enough info
+# For example, issue author metadata
 from .request.xml import Request
 
 

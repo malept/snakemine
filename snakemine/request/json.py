@@ -22,6 +22,7 @@ HTTP Request handler using the JSON version of the API.
 from __future__ import absolute_import
 
 from . import base
+from ..response.json import Response
 from datetime import date, datetime
 from dateutil.parser import parse
 from decimal import Decimal
@@ -59,10 +60,10 @@ class JSONEncoder(json.JSONEncoder):
 
 def deserialize_json(dct):
     for field in DATE_FIELDS:
-        if field in dct:
+        if field in dct and dct[field]:
             dct[field] = datetime.strptime(dct[field], DATE_FORMAT).date()
     for field in DATETIME_FIELDS:
-        if field in dct:
+        if field in dct and dct[field]:
             dct[field] = parse(dct[field])
     return dct
 
@@ -77,6 +78,10 @@ class Request(base.Request):
         if response.status_code == 200:
             result = json.loads(response.text, object_hook=deserialize_json,
                                 parse_float=Decimal)
+        if isinstance(result, list):
+            result = [Response(r) for r in result]
+        else:
+            result = [Response(result)]
         return response.status_code, result
 
     def post_object(self, path, data):
