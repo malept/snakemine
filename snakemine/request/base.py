@@ -20,27 +20,29 @@ Base HTTP Request handler.
 '''
 
 import requests
+from .. import conf
 
 
 class Request(object):
     '''Handles requests to the Redmine API.'''
 
-    def __init__(self, base_uri, username=None, password=None, api_key=None):
-        self._base_uri = base_uri
-        self._username = username
-        self._password = password
-        self._api_key = api_key
-        if self._username:
-            if self._api_key:
-                self.password = 'unused'
-            self._auth = (self._username, self._password)
+    @property
+    def _auth(self):
+        username = conf.settings.USERNAME
+        password = conf.settings.PASSWORD
+        api_key = conf.settings.API_KEY
+        if username:
+            if api_key:
+                password = 'unused'
+            return (username, password)
         else:
-            self._auth = None
+            return None
 
     def _send_request(self, method, path, params={}, data=None):
-        uri = '%s%s.%s' % (self._base_uri, path, self._format)
-        if self._api_key:
-            params['key'] = self._api_key
+        uri = '%s%s.%s' % (conf.settings.BASE_URI, path, self._format)
+        api_key = conf.settings.API_KEY
+        if api_key:
+            params['key'] = api_key
         return getattr(requests, method)(uri, params=params, data=data,
                                          auth=self._auth)
 

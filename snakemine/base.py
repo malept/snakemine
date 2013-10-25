@@ -20,15 +20,13 @@ Base for Redmine models.
 '''
 
 from .request.xml import Request
-from .conf import settings
 
 
 class Manager(object):
     '''A Django-like model manager for Redmine resources.'''
 
     def __init__(self):
-        self._request = Request(settings.BASE_URI, settings.USERNAME,
-                                settings.PASSWORD, settings.API_KEY)
+        self._request = Request()
 
     def _get(self, path=None, params={}):
         if not path:
