@@ -14,26 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from contextlib import contextmanager
-from copy import deepcopy
+from . import test_environ, test_settings
 import logging
 from logging.handlers import MemoryHandler
-import os
 from snakemine.conf import Settings
+from snakemine.issue import Issue
 from unittest import TestCase
-
-
-@contextmanager
-def environ(**kwargs):
-    old_environ = deepcopy(os.environ)
-    for k, v in kwargs.iteritems():
-        #if k in os.environ and v is None:
-        #    del os.environ[k]
-        #else:
-        #    os.environ[k] = v
-        os.environ[k] = v
-    yield
-    os.environ = old_environ
 
 
 class SettingsTest(TestCase):
@@ -44,28 +30,42 @@ class SettingsTest(TestCase):
         logger = logging.getLogger('snakemine.conf')
         logger.addHandler(MemoryHandler(100))
 
+    def test_unconfigured(self):
+        settings = Settings({})
+        with test_environ(SNAKEMINE_SETTINGS_MODULE=None):
+            with self.assertRaises(RuntimeError):
+                settings.foo
+
     def test_environ_var_nonexistent_module(self):
         settings = Settings({})
-        with environ(SNAKEMINE_SETTINGS_MODULE='doesnotexist'):
+        with test_environ(SNAKEMINE_SETTINGS_MODULE='doesnotexist'):
             with self.assertRaises(RuntimeError):
                 settings.foo
 
     def test_environ_var_valid_module(self):
         settings = Settings({})
-        with environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
+        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
             self.assertEqual('jsmith', settings.USERNAME)
 
     def test_environ_var_valid_module_invalid_attr(self):
         settings = Settings({})
-        with environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
+        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
             with self.assertRaises(AttributeError):
                 settings.foo
 
     def test_double_configure(self):
         settings = Settings({})
         self.assertFalse(settings.configured)
-        with environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
+        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
             settings.configure()
             self.assertTrue(settings.configured)
             with self.assertRaises(RuntimeError):
                 settings.configure()
+
+    def test_api_key(self):
+        with test_settings(USERNAME='jsmith', API_KEY='1234abcd'):
+            self.assertIsNotNone(Issue.objects.get(1))
+
+    def test_no_auth(self):
+        with test_settings():
+            self.assertIsNotNone(Issue.objects.get(1))
