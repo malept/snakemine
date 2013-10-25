@@ -84,3 +84,57 @@ class IssueTest(TestCase):
         issue2 = Issue.objects.get(1)
         self.assertNotEqual(id(issue1), id(issue2))
         self.assertEqual(issue1, issue2)
+
+    def test_create_issue(self):
+        issue = Issue(None)
+        self.assertIsNone(issue.id)
+        self.assertIsNone(issue.author)
+        issue.project_id = 1
+        issue.subject = 'test from unittest'
+        issue.save()
+        self.assertIsNotNone(issue.id)
+        self.assertIsNotNone(issue.author)
+        self.assertEqual('John Smith', issue.author.name)
+
+        # make sure we're not sharing anything weird
+        issue2 = Issue(None)
+        self.assertIsNone(issue2.author)
+
+        # cleanup
+        issue.delete()
+
+    def test_update_issue(self):
+        issue = Issue(None)
+        self.assertIsNone(issue.id)
+        issue.project_id = 1
+        issue.subject = 'issue to be updated'
+        issue.save()
+        self.assertIsNotNone(issue.id)
+        issue2 = Issue.objects.get(issue.id)
+        self.assertEqual(issue, issue2)
+        self.assertEqual(issue.subject, issue2.subject)
+        updated_subject = 'updated subject'
+        issue.subject = updated_subject
+        issue.save()
+        self.assertNotEqual(issue.subject, issue2.subject)
+        issue3 = Issue.objects.get(issue.id)
+        self.assertEqual(issue.subject, issue3.subject)
+
+        # cleanup
+        issue.delete()
+
+    def test_delete_issue(self):
+        issue = Issue(None)
+        self.assertIsNone(issue.id)
+        issue.project_id = 1
+        issue.subject = 'issue to be deleted'
+        issue.save()
+        self.assertIsNotNone(issue.id)
+        issue2 = Issue.objects.get(issue.id)
+        self.assertEqual(issue, issue2)
+        self.assertEqual(issue.subject, issue2.subject)
+        issue.delete()
+        with self.assertRaises(AttributeError):
+            issue.subject = 'this will fail'
+        with self.assertRaises(RuntimeError):
+            issue.save()

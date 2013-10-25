@@ -71,6 +71,7 @@ def deserialize_json(dct):
 class Request(base.Request):
     '''Handles requests to the Redmine API using JSON.'''
     _format = 'json'
+    _content_type = 'application/json'
 
     def _send(self, method, path, params={}, data=None):
         response = self._send_request(method, path, params=params, data=data)

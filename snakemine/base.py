@@ -37,6 +37,9 @@ class Manager(object):
                 for data in self._request.get(path, params=params)[1]
                 if data]
 
+    def _resource_path(self, resource_id):
+        return '%s/%s' % (self._path, resource_id)
+
     def all(self):
         return self._get()
 
@@ -44,7 +47,24 @@ class Manager(object):
         return self._get(params=kwargs)
 
     def get(self, resource_id):
-        return self._get(path='%s/%s' % (self._path, resource_id))[0]
+        return self._get(self._resource_path(resource_id))[0]
+
+    def _data_to_send(self, data):
+        return {
+            'object': self._cls.__name__.lower(),
+            'data': data,
+        }
+
+    def create(self, data):
+        resp = self._request.post(self._path, data=self._data_to_send(data))
+        return self._cls(resp[1][0])
+
+    def update(self, resource_id, data):
+        self._request.put(self._resource_path(resource_id),
+                          data=self._data_to_send(data))
+
+    def delete(self, resource_id):
+        self._request.delete(self._resource_path(resource_id))
 
 
 class Resource(object):
@@ -52,9 +72,44 @@ class Resource(object):
 
     def __init__(self, response):
         self._response = response
+        self._changed = {}
+        self._deleted = False
 
     def __getattr__(self, key):
-        return getattr(self._response, key)
+        val = self._changed.get(key)
+        if val is None:
+            if self._response is None:
+                return None
+            else:
+                return getattr(self._response, key)
+
+    def __setattr__(self, key, value):
+        if key.startswith('_'):
+            super(Resource, self).__setattr__(key, value)
+        elif self._deleted:
+            raise AttributeError('Resource is deleted')
+        else:
+            self._changed[key] = value
 
     def __eq__(self, other):
         return isinstance(other, type(self)) and self.id == other.id
+
+    def save(self):
+        if self._deleted:
+            raise RuntimeError('Resource is deleted')
+        elif self._response is None:
+            # new object
+            resource = self.objects.create(self._changed)
+            self._response = resource._response
+        else:
+            # existing object
+            self.objects.update(self.id, self._changed)
+            for k, v in self._changed.iteritems():
+                setattr(self._response, k, v)
+        self._changed = {}
+
+    def delete(self):
+        if self._response:
+            self.objects.delete(self.id)
+            self._response = None
+            self._deleted = True

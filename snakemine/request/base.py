@@ -39,12 +39,15 @@ class Request(object):
             return None
 
     def _send_request(self, method, path, params={}, data=None):
+        headers = {}
+        if method in ('post', 'put'):
+            headers['Content-Type'] = self._content_type
         uri = '%s%s.%s' % (conf.settings.BASE_URI, path, self._format)
         api_key = conf.settings.API_KEY
         if api_key:
             params['key'] = api_key
         return getattr(requests, method)(uri, params=params, data=data,
-                                         auth=self._auth)
+                                         auth=self._auth, headers=headers)
 
     def _send(self, method, path, params={}, data=None):
         raise NotImplementedError()
@@ -54,3 +57,9 @@ class Request(object):
 
     def post(self, path, params={}, data=None):
         return self._send('post', path, params, data)
+
+    def put(self, path, params={}, data=None):
+        return self._send('put', path, params, data)
+
+    def delete(self, path):
+        return self._send('delete', path)
