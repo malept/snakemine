@@ -53,6 +53,20 @@ class IssueTest(TestCase):
         self.assertTrue(hasattr(issue2, 'comments'))
         self.assertEqual(1, len(issue2.comments))
 
+    def test_attr_comments(self):
+        issue = Issue.objects.get(2)
+        self.assertTrue(hasattr(issue, 'comments'))
+        self.assertEqual(1, len(issue.comments))
+        comment = issue.comments[0]
+        self.assertIsInstance(comment.id, int)
+        self.assertEqual(comment.notes, str(comment))
+        self.assertIsNotNone(comment.user)
+        self.assertEqual('John Smith', comment.user.name)
+
+    def test_attr_no_comments(self):
+        issue = Issue.objects.get(14)
+        self.assertEqual([], issue.comments)
+
     def test_attr_project(self):
         issue = Issue.objects.get(1)
         project = issue.project
