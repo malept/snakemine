@@ -24,7 +24,8 @@ if [[ -z "$UNZIP_DIR" ]]; then
     UNZIP_DIR=/tmp
 fi
 
-REDMINE_DIR=redmine-1.0.4
+REDMINE_VERSION=1.0.4
+REDMINE_DIR=redmine-${REDMINE_VERSION}
 REDMINE_TGZ=${REDMINE_DIR}.tar.gz
 REDMINE_TGZ_URL=http://rubyforge.org/frs/download.php/73457/${REDMINE_TGZ}
 
@@ -35,10 +36,12 @@ flake8 .
 
 if [[ -z "$NO_SETUP_NEEDED" ]]; then
     if [[ ! -f "$LOCAL_REDMINE_TGZ" ]]; then
+        echo "Downloading Redmine ${REDMINE_VERSION} from the internet..."
         wget -O "$LOCAL_REDMINE_TGZ" "$REDMINE_TGZ_URL"
     fi
 
     if [[ -d "$LOCAL_REDMINE_DIR" ]]; then
+        echo 'Re-creating Redmine install...'
         rm -r "$LOCAL_REDMINE_DIR"
     fi
 
@@ -53,14 +56,14 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
         gem unpack rack-1.0.1.gem
         rm rack-1.0.1.gem
     )
-    rake generate_session_store db:migrate db:fixtures:load
-    script/runner 'Token.create!(:action => "api", :user_id => 2, :value => "1234abcd");
+    RAILS_ENV=production rake generate_session_store db:migrate db:fixtures:load
+    RAILS_ENV=production script/runner 'Token.create!(:action => "api", :user_id => 2, :value => "1234abcd");
 Issue.create!(:parent_issue_id => 1, :subject => "parent issue test", :tracker_id => 1, :project_id => 1, :description => "Parent issue test", :author_id => 3)'
 else
     cd "$LOCAL_REDMINE_DIR"
 fi
 
-script/server --daemon --binding=127.0.0.1
+RAILS_ENV=production script/server --daemon --binding=127.0.0.1
 # make sure the stupid server is ready to accept connections before running tests
 echo 'Waiting for Redmine to be responsive...'
 while true; do
