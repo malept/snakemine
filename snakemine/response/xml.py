@@ -64,10 +64,7 @@ class Response(base.Response):
 
     @property
     def project_id(self):
-        try:
-            return self.project.attrib['id']
-        except Exception:
-            return None
+        return self.project.attrib['id']
 
     @property
     def comments(self):
