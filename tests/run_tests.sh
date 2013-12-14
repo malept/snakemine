@@ -25,8 +25,12 @@ REDMINE_DIR=redmine-${REDMINE_VERSION}
 REDMINE_TGZ=${REDMINE_DIR}.tar.gz
 REDMINE_TGZ_URL=http://rubyforge.org/frs/download.php/73457/${REDMINE_TGZ}
 
+RACK_VERSION=1.0.1
+RACK_GEM=rack-${RACK_VERSION}.gem
+
 LOCAL_REDMINE_TGZ="$DOWNLOAD_CACHE/$REDMINE_TGZ"
 LOCAL_REDMINE_DIR="$UNZIP_DIR/$REDMINE_DIR"
+LOCAL_RACK_GEM="$DOWNLOAD_CACHE/$RACK_GEM"
 
 flake8 . || exit 1
 
@@ -48,9 +52,11 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
     # install one gem locally
     (
         cd vendor/gems
-        gem fetch rack -v '~> 1.0.1'
-        gem unpack rack-1.0.1.gem
-        rm rack-1.0.1.gem
+        if [[ ! -f "$LOCAL_RACK_GEM" ]]; then
+            echo "Downloading the rack-${RACK_VERSION} gem..."
+            (cd "$DOWNLOAD_CACHE" && gem fetch rack -v "${RACK_VERSION}")
+        fi
+        gem unpack "$LOCAL_RACK_GEM"
     )
     RAILS_ENV=production rake generate_session_store db:migrate db:fixtures:load
     RAILS_ENV=production script/runner 'Token.create!(:action => "api", :user_id => 2, :value => "1234abcd");
