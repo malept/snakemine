@@ -45,7 +45,7 @@ DATETIME_FORMAT = '%Y/%m/%d %H:%M:%S %z'
 
 
 class JSONEncoder(json.JSONEncoder):
-    '''Encodes :cls:`datetime.date` and :cls:`datetime.datetime` objects
+    '''Encodes :class:`datetime.date` and :class:`datetime.datetime` objects
     into JSON.
     '''
 
