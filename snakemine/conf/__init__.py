@@ -20,7 +20,7 @@ There are two ways to set user-specific settings:
 
 1. Create a module with all of the settings in it and point snakemine to the
    module via the ``SNAKEMINE_SETTINGS_MODULE`` environment variable.
-2. Use :method:`Settings.configure` to set the values via its
+2. Use :func:`Settings.configure` to set the values via its
    keyword arguments.
 
 .. moduleauthor:: Mark Lee <snakemine@lazymalevolence.com>
@@ -37,9 +37,10 @@ logger = logging.getLogger(__name__)
 
 class Settings(object):
     '''
-    Settings object for snakemine.
+    Settings object for :mod:`snakemine`.
 
-    :param dict default_settings: The default settings
+    :param dict default_settings: The default settings. A copy of this
+                                  parameter is stored in the created object.
     '''
 
     def __init__(self, default_settings):
@@ -53,13 +54,15 @@ class Settings(object):
         method. This method can only be called if the object has not already
         had user settings set.
 
-        :param dict default_settings: The default settings
+        :param dict default_settings: The default settings, which will
+                                      override the default settings passed in
+                                      at object creation.
         '''
         if self.configured:
             msg = 'Settings for snakemine have already been configured'
             raise RuntimeError(msg)
-        if not default_settings:
-            default_settings = {}
+        if default_settings:
+            self._defaults = default_settings
         self._set_from_kwargs(**kwargs)
         self._configured = True
 

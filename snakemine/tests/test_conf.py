@@ -62,6 +62,15 @@ class SettingsTest(TestCase):
             with self.assertRaises(RuntimeError):
                 settings.configure()
 
+    def test_configure_with_default_settings(self):
+        settings = Settings({})
+        defaults = {
+            'USERNAME': 'jschmidt',
+        }
+        with test_environ(SNAKEMINE_SETTINGS_MODULE=None):
+            settings.configure(default_settings=defaults)
+            self.assertEqual('jschmidt', settings.USERNAME)
+
     def test_api_key(self):
         with test_settings(USERNAME='jsmith', API_KEY='1234abcd'):
             self.assertIsNotNone(Issue.objects.get(1))
