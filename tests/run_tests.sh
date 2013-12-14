@@ -16,13 +16,9 @@
 
 BASE_DIR="$(pwd)/$(dirname $0)"
 
-if [[ -z "$DOWNLOAD_CACHE" ]]; then
-    DOWNLOAD_CACHE=/tmp
-fi
+[[ -z "$DOWNLOAD_CACHE" ]] && DOWNLOAD_CACHE=/tmp
 
-if [[ -z "$UNZIP_DIR" ]]; then
-    UNZIP_DIR=/tmp
-fi
+[[ -z "$UNZIP_DIR" ]] && UNZIP_DIR=/tmp
 
 REDMINE_VERSION=1.0.4
 REDMINE_DIR=redmine-${REDMINE_VERSION}
@@ -32,7 +28,7 @@ REDMINE_TGZ_URL=http://rubyforge.org/frs/download.php/73457/${REDMINE_TGZ}
 LOCAL_REDMINE_TGZ="$DOWNLOAD_CACHE/$REDMINE_TGZ"
 LOCAL_REDMINE_DIR="$UNZIP_DIR/$REDMINE_DIR"
 
-flake8 .
+flake8 . || exit 1
 
 if [[ -z "$NO_SETUP_NEEDED" ]]; then
     if [[ ! -f "$LOCAL_REDMINE_TGZ" ]]; then
@@ -66,16 +62,15 @@ fi
 RAILS_ENV=production script/server --daemon --binding=127.0.0.1
 # make sure the stupid server is ready to accept connections before running tests
 echo 'Waiting for Redmine to be responsive...'
-while true; do
-    if [[ $(curl -q http://127.0.0.1:3000 2> /dev/null > /dev/null; echo $?) == 0 ]]; then
-        echo
-        echo 'Starting tests...'
-        break
-    else
-        echo -n .
-    fi
+while [[ $(curl -q http://127.0.0.1:3000 2> /dev/null > /dev/null; echo $?) != 0 ]]; do
+    echo -n .
     sleep 1
 done
+
+echo
+echo 'Starting tests...'
+echo
+
 (
     cd "$BASE_DIR"/..
     PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" coverage run -m unittest discover
