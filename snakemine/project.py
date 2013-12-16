@@ -13,6 +13,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+'''\
+Handling of `Redmine projects
+<http://www.redmine.org/projects/redmine/wiki/Rest_Projects>`_.
+
+.. moduleauthor:: Mark Lee <snakemine@lazymalevolence.com>
+'''
 
 from .base import Manager, Resource
 

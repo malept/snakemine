@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2011, 2013 Mark Lee
+# Copyright 2013 Mark Lee
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-'''\
-A Pythonic interface to `Redmine's REST API`_.
 
-.. _Redmine's REST API: http://www.redmine.org/projects/redmine/wiki/Rest_api
-.. moduleauthor:: Mark Lee <snakemine@lazymalevolence.com>
-'''
+DESCRIPTION = '''A Pythonic interface to Redmine's REST API.'''
+VERSION = '1.0b1'
 
-from .metadata import DESCRIPTION, VERSION
-
-__description__ = DESCRIPTION
-__version__ = VERSION
+__all__ = ['DESCRIPTION', 'VERSION']

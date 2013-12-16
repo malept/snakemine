@@ -14,8 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 '''\
-Handling of Redmine issues.
+Handling of `Redmine issues`_.
 
+.. _Redmine issues: http://www.redmine.org/projects/redmine/wiki/Rest_Issues
 .. moduleauthor:: Mark Lee <snakemine@lazymalevolence.com>
 '''
 
@@ -42,6 +43,11 @@ class Issue(Resource):
 
     @property
     def parent(self):
+        '''
+        The parent issue, if specified.
+
+        :rtype: :class:`Issue` or :data:`None`
+        '''
         if self.parent_id:
             return self.objects.get(self.parent_id)
         else:
@@ -50,9 +56,10 @@ class Issue(Resource):
     @property
     def project(self):
         '''
-        A project relation is required on an Issue, so there is no check to see
-        if ``project_id`` exists.
+        The :class:`Project` associated with the issue.
         '''
+        # A project relation is required on an Issue, so there is no check to see
+        # if ``project_id`` exists.
         return Project.objects.get(self.project_id)
 
     def __repr__(self):

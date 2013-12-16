@@ -41,12 +41,23 @@ class Manager(object):
         return '%s/%s' % (self._path, resource_id)
 
     def all(self):
+        '''
+        Retrieves all of the available items for a given resource.
+
+        :rtype: :func:`list` of :class:`Resource`
+        '''
         return self._get()
 
     def filter(self, **kwargs):
         return self._get(params=kwargs)
 
     def get(self, resource_id):
+        '''
+        Retrieves a single item for a given resource and ID.
+
+        :param int resource_id: The resource's ID
+        :rtype: :class:`Resource`
+        '''
         return self._get(self._resource_path(resource_id))[0]
 
     def _data_to_send(self, data):
@@ -56,6 +67,12 @@ class Manager(object):
         }
 
     def create(self, data):
+        '''
+        Creates a new :class:`Resource`-derived object.
+
+        :param dict data: The new resource metadata
+        :rtype: :class:`Resource`
+        '''
         resp = self._request.post(self._path, data=self._data_to_send(data))
         return self._cls(resp[1][0])
 
@@ -68,7 +85,16 @@ class Manager(object):
 
 
 class Resource(object):
-    '''A representation of a Redmine resource.'''
+    '''
+    An abstract representation of a Redmine resource.
+
+    Much like a Django model, a ``Resource`` typically has a class variable
+    named ``objects``, which is an instantiation of the related
+    :class:`Manager`.
+
+    :param response: the object the represents the metadata of the
+                     resource item
+    '''
 
     def __init__(self, response):
         self._response = response
@@ -95,6 +121,9 @@ class Resource(object):
         return isinstance(other, type(self)) and self.id == other.id
 
     def save(self):
+        '''
+        Creates or updates the resource item in Redmine.
+        '''
         if self._deleted:
             raise RuntimeError('Resource is deleted')
         elif self._response is None:
@@ -109,6 +138,7 @@ class Resource(object):
         self._changed = {}
 
     def delete(self):
+        '''Deletes the resource item from Redmine.'''
         if self._response:
             self.objects.delete(self.id)
             self._response = None
