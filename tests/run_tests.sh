@@ -76,9 +76,9 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
     cp "$BASE_DIR"/database.yml "$LOCAL_REDMINE_DIR"/config/
     if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
         # if redmine comes from SVN, install rails too
-        # but first install an old version of rake
-        gem install rake -v 0.8.7
         gem install rails -v "$RAILS_VERSION"
+        # Avoid error with old rake + new RDoc
+        sed -i -e '#rake/rdoctask#d' Rakefile
     else
         # install one gem locally
         unpack_gem rack $RACK_VERSION vendor/gems
