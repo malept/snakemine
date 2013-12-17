@@ -361,4 +361,3 @@ epub_copyright = COPYRIGHT
 
 # If false, no index is generated.
 #epub_use_index = True
-

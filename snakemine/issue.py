@@ -58,8 +58,8 @@ class Issue(Resource):
         '''
         The :class:`Project` associated with the issue.
         '''
-        # A project relation is required on an Issue, so there is no check to see
-        # if ``project_id`` exists.
+        # A project relation is required on an Issue, so there is no check to
+        # see if ``project_id`` exists.
         return Project.objects.get(self.project_id)
 
     def __repr__(self):
