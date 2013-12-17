@@ -55,6 +55,14 @@ unpack_gem() {
     )
 }
 
+# Set the correct RVM ruby (1.8.7) if RVM is installed
+if [[ $(which rvm > /dev/null) -eq 0 ]]; then
+    if [[ $(type rvm | head -n 1 | grep -o function) == "function" ]]; then
+        [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+    fi
+    rvm use 1.8.7
+fi
+
 if [[ -z "$NO_SETUP_NEEDED" ]]; then
     if [[ -d "$LOCAL_REDMINE_DIR" ]]; then
         echo 'Re-creating Redmine install...'
@@ -72,11 +80,9 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
     fi
 
     cd "$LOCAL_REDMINE_DIR"
+    # enable the REST API
     perl -0 -i -pe 's@(rest_api_enabled:\s+default:) 0@$1 1@msg' config/settings.yml
     cp "$BASE_DIR"/database.yml "$LOCAL_REDMINE_DIR"/config/
-    if [[ $(which rvm > /dev/null) -eq 0 ]]; then
-        rvm use 1.8.7
-    fi
     if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
         # if redmine comes from SVN, install rails too
         gem install rails -v "$RAILS_VERSION"
