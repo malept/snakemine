@@ -74,11 +74,14 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
     cd "$LOCAL_REDMINE_DIR"
     perl -0 -i -pe 's@(rest_api_enabled:\s+default:) 0@$1 1@msg' config/settings.yml
     cp "$BASE_DIR"/database.yml "$LOCAL_REDMINE_DIR"/config/
-    # install one gem locally
-    unpack_gem rack $RACK_VERSION vendor/gems
-    # if redmine comes from SVN, install rails too
     if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
+        # if redmine comes from SVN, install rails too
+        # but first install an old version of rake
+        gem install rake -v 0.8.7
         gem install rails -v "$RAILS_VERSION"
+    else
+        # install one gem locally
+        unpack_gem rack $RACK_VERSION vendor/gems
     fi
     RAILS_ENV=production rake generate_session_store db:migrate db:fixtures:load
     RAILS_ENV=production script/runner 'Token.create!(:action => "api", :user_id => 2, :value => "1234abcd");
