@@ -1,5 +1,3 @@
-argparse
-importlib
 lxml
 python-dateutil
 requests
