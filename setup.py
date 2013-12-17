@@ -14,6 +14,8 @@ with open('README.rst') as f:
 requires = []
 if not os.environ.get('READTHEDOCS'):
     requires = [l for l in open('requirements.txt')]
+    if sys.version_info < (2, 7):
+        requires += [l for l in open('requirements-2.6.txt')]
 
 setup(name='snakemine',
       version=metadata.VERSION,
