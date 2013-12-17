@@ -20,44 +20,66 @@ BASE_DIR="$(pwd)/$(dirname $0)"
 
 [[ -z "$UNZIP_DIR" ]] && UNZIP_DIR=/tmp
 
+[[ -z "$REDMINE_DOWNLOAD_METHOD" ]] && REDMINE_DOWNLOAD_METHOD=TGZ
+
 REDMINE_VERSION=1.0.4
 REDMINE_DIR=redmine-${REDMINE_VERSION}
 REDMINE_TGZ=${REDMINE_DIR}.tar.gz
 REDMINE_TGZ_URL=http://rubyforge.org/frs/download.php/73457/${REDMINE_TGZ}
+REDMINE_SVN_URL=http://svn.redmine.org/redmine/tags/${REDMINE_VERSION}
 
 RACK_VERSION=1.0.1
-RACK_GEM=rack-${RACK_VERSION}.gem
+RAILS_VERSION=2.3.5
 
 LOCAL_REDMINE_TGZ="$DOWNLOAD_CACHE/$REDMINE_TGZ"
 LOCAL_REDMINE_DIR="$UNZIP_DIR/$REDMINE_DIR"
-LOCAL_RACK_GEM="$DOWNLOAD_CACHE/$RACK_GEM"
 
 flake8 . || exit 1
 
-if [[ -z "$NO_SETUP_NEEDED" ]]; then
-    if [[ ! -f "$LOCAL_REDMINE_TGZ" ]]; then
-        echo "Downloading Redmine ${REDMINE_VERSION} from the internet..."
-        wget -O "$LOCAL_REDMINE_TGZ" "$REDMINE_TGZ_URL"
+unpack_gem() {
+    GEM_NAME="$1"
+    GEM_VERSION="$2"
+    UNPACK_DIR="$3"
+    GEM_FILE="$GEM_NAME-$GEM_VERSION.gem"
+    LOCAL_GEM="$DOWNLOAD_CACHE/$GEM_FILE"
+    if [[ ! -f "$LOCAL_GEM" ]]; then
+        echo "Downloading the ${GEM_NAME}-${GEM_VERSION} gem..."
+        (
+            cd "$DOWNLOAD_CACHE"
+            gem fetch ${GEM_NAME} -v "${GEM_VERSION}"
+        )
     fi
+    (
+        cd "$UNPACK_DIR"
+        gem unpack "$LOCAL_GEM"
+    )
+}
 
+if [[ -z "$NO_SETUP_NEEDED" ]]; then
     if [[ -d "$LOCAL_REDMINE_DIR" ]]; then
         echo 'Re-creating Redmine install...'
         rm -r "$LOCAL_REDMINE_DIR"
     fi
 
-    tar -C "$UNZIP_DIR" -xf "$LOCAL_REDMINE_TGZ"
+    if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
+        svn co "$REDMINE_SVN_URL" "$LOCAL_REDMINE_DIR"
+    else
+        if [[ ! -f "$LOCAL_REDMINE_TGZ" ]]; then
+            echo "Downloading Redmine ${REDMINE_VERSION} from the internet..."
+            wget -O "$LOCAL_REDMINE_TGZ" "$REDMINE_TGZ_URL"
+        fi
+        tar -C "$UNZIP_DIR" -xf "$LOCAL_REDMINE_TGZ"
+    fi
+
     cd "$LOCAL_REDMINE_DIR"
     perl -0 -i -pe 's@(rest_api_enabled:\s+default:) 0@$1 1@msg' config/settings.yml
     cp "$BASE_DIR"/database.yml "$LOCAL_REDMINE_DIR"/config/
     # install one gem locally
-    (
-        cd vendor/gems
-        if [[ ! -f "$LOCAL_RACK_GEM" ]]; then
-            echo "Downloading the rack-${RACK_VERSION} gem..."
-            (cd "$DOWNLOAD_CACHE" && gem fetch rack -v "${RACK_VERSION}")
-        fi
-        gem unpack "$LOCAL_RACK_GEM"
-    )
+    unpack_gem rack $RACK_VERSION vendor/gems
+    # if redmine comes from SVN, install rails too
+    if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
+        gem install rails -v "$RAILS_VERSION"
+    fi
     RAILS_ENV=production rake generate_session_store db:migrate db:fixtures:load
     RAILS_ENV=production script/runner 'Token.create!(:action => "api", :user_id => 2, :value => "1234abcd");
 Issue.create!(:parent_issue_id => 1, :subject => "parent issue test", :tracker_id => 1, :project_id => 1, :description => "Parent issue test", :author_id => 3)'
