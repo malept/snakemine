@@ -56,10 +56,14 @@ unpack_gem() {
 }
 
 # Set the correct RVM ruby (1.8.7) if RVM is installed
-if [[ $(which rvm > /dev/null) -eq 0 ]]; then
+if $(which rvm > /dev/null); then
     echo 'Loading the RVM script...'
     [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
     rvm list
+    if ! $(rvm list strings | grep -q 1.8.7); then
+        echo 'Installing Ruby 1.8.7...'
+        rvm install 1.8.7
+    fi
     echo 'Setting Ruby to 1.8.7...'
     rvm use 1.8.7
 fi
