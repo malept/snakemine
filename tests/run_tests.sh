@@ -127,6 +127,8 @@ echo
 (
     cd "$BASE_DIR"/..
     PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" coverage run -m unittest discover
+    export EXIT_VAL=$?
     coverage report -m
 )
 kill -9 `cat tmp/pids/server.pid`
+exit $EXIT_VAL
