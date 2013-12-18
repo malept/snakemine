@@ -58,8 +58,10 @@ unpack_gem() {
 # Set the correct RVM ruby (1.8.7) if RVM is installed
 if [[ $(which rvm > /dev/null) -eq 0 ]]; then
     if [[ $(type rvm | head -n 1 | grep -o function) == "function" ]]; then
+        echo 'Loading the RVM script...'
         [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
     fi
+    echo 'Setting Ruby to 1.8.7...'
     rvm use 1.8.7
 fi
 
@@ -84,10 +86,11 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
     perl -0 -i -pe 's@(rest_api_enabled:\s+default:) 0@$1 1@msg' config/settings.yml
     cp "$BASE_DIR"/database.yml "$LOCAL_REDMINE_DIR"/config/
     if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
+        # Force install old rake
+        gem uninstall rake
+        gem install rake -v 0.8.7
         # if redmine comes from SVN, install rails too
         gem install rails -v "$RAILS_VERSION"
-        # Avoid error with old rake + new RDoc
-        sed -i -e '/rdoctask/d' "$LOCAL_REDMINE_DIR"/Rakefile
     else
         # install one gem locally
         unpack_gem rack $RACK_VERSION vendor/gems
