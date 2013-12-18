@@ -63,6 +63,7 @@ if $(which rvm > /dev/null); then
     if ! $(rvm list strings | grep -q 1.8.7); then
         echo 'Installing Ruby 1.8.7...'
         rvm install 1.8.7
+        rvm rubygems 1.3.7
     fi
     echo 'Setting Ruby to 1.8.7...'
     rvm use 1.8.7
@@ -91,6 +92,7 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
     if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
         # if redmine comes from SVN, install rails too
         gem install rails -v "$RAILS_VERSION"
+        gem install rdoc
         sed -i -e "s@2.3.5@$RAILS_VERSION@g" "$LOCAL_REDMINE_DIR"/config/environment.rb
         sed -i -e 's@rake/rdoctask@rdoc/task@g' "$LOCAL_REDMINE_DIR"/Rakefile
     else
