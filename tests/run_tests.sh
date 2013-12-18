@@ -55,21 +55,23 @@ unpack_gem() {
     )
 }
 
-# Set the correct RVM ruby (1.8.7) if RVM is installed
-if $(which rvm > /dev/null); then
-    echo 'Loading the RVM script...'
-    [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-    if ! $(rvm list strings | grep -q 1.8.7); then
-        echo 'Installing Ruby 1.8.7...'
-        cp ~/.rvm/gemsets/global.gems{,.orig}
-        sed -i -e '/bundler/d' -e '/rake/d' ~/.rvm/gemsets/global.gems
-        rvm install 1.8.7
-        rvm use 1.8.7
-        rvm rubygems 1.4.2
-        mv ~/.rvm/gemsets/global.gems{.orig,}
-    else
-        echo 'Setting Ruby to 1.8.7...'
-        rvm use 1.8.7
+if [[ -z "$RVM_ALREADY_SET" ]]; then
+    # Set the correct RVM ruby (1.8.7) if RVM is installed
+    if $(which rvm > /dev/null); then
+        echo 'Loading the RVM script...'
+        [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+        if ! $(rvm list strings | grep -q 1.8.7); then
+            echo 'Installing Ruby 1.8.7...'
+            cp ~/.rvm/gemsets/global.gems{,.orig}
+            sed -i -e '/bundler/d' -e '/rake/d' ~/.rvm/gemsets/global.gems
+            rvm install 1.8.7
+            rvm use 1.8.7
+            rvm rubygems 1.4.2
+            mv ~/.rvm/gemsets/global.gems{.orig,}
+        else
+            echo 'Setting Ruby to 1.8.7...'
+            rvm use 1.8.7
+        fi
     fi
 fi
 
@@ -81,7 +83,6 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
 
     if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
         svn co "$REDMINE_SVN_URL" "$LOCAL_REDMINE_DIR"
-        echo 'config.action_controller.session = { :key => "_redmine_session", :secret => "31ea0a98608815189ee8118e6d6bbcbb" }' >> "$LOCAL_REDMINE_DIR"/config/environments/production.rb
     else
         if [[ ! -f "$LOCAL_REDMINE_TGZ" ]]; then
             echo "Downloading Redmine ${REDMINE_VERSION} from the internet..."
@@ -105,6 +106,7 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
         # install one gem locally
         unpack_gem rack $RACK_VERSION vendor/gems
     fi
+    echo 'config.action_controller.session = { :key => "_redmine_session", :secret => "31ea0a98608815189ee8118e6d6bbcbb" }' >> "$LOCAL_REDMINE_DIR"/config/environments/production.rb
     RAILS_ENV=production rake generate_session_store db:migrate db:fixtures:load
     RAILS_ENV=production script/runner 'Token.create!(:action => "api", :user_id => 2, :value => "1234abcd");
 Issue.create!(:parent_issue_id => 1, :subject => "parent issue test", :tracker_id => 1, :project_id => 1, :description => "Parent issue test", :author_id => 3)'
@@ -124,11 +126,12 @@ echo
 echo 'Starting tests...'
 echo
 
-(
-    cd "$BASE_DIR"/..
+cd "$BASE_DIR"/..
+if [[ -n $RUN_COVERAGE ]]; then
     PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" coverage run -m unittest discover
-    export EXIT_VAL=$?
     coverage report -m
-)
-kill -9 `cat tmp/pids/server.pid`
-exit $EXIT_VAL
+else
+    PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" python -m unittest discover
+fi
+
+kill -9 `cat "$LOCAL_REDMINE_DIR"/tmp/pids/server.pid`
