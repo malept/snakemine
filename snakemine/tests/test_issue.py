@@ -21,11 +21,10 @@ from unittest import TestCase
 class IssueTest(TestCase):
     '''Assumes that the Redmine instance with the fixture data is running.'''
 
-    ALL_ISSUE_CT = 11
-
     def test_all(self):
         issues = Issue.objects.all()
-        self.assertEqual(self.ALL_ISSUE_CT, len(issues))
+        self.assertIsNotNone(issues)
+        self.assertNotEqual(0, len(issues))
         for issue in issues:
             self.assertIsInstance(issue, Issue)
 
@@ -36,7 +35,7 @@ class IssueTest(TestCase):
     def test_filter(self):
         issues = Issue.objects.filter(assigned_to_id=2)
         self.assertIsNotNone(issues)
-        self.assertNotEqual(self.ALL_ISSUE_CT, len(issues))
+        self.assertNotEqual(len(Issue.objects.all()), len(issues))
 
     def test_attrs(self):
         issue = Issue.objects.get(1)

@@ -21,11 +21,10 @@ from unittest import TestCase
 class ProjectTest(TestCase):
     '''Assumes that the Redmine instance with the fixture data is running.'''
 
-    ALL_PROJECT_CT = 6
-
     def test_all(self):
         projects = Project.objects.all()
-        self.assertEqual(self.ALL_PROJECT_CT, len(projects))
+        self.assertIsNotNone(projects)
+        self.assertNotEqual(0, len(projects))
         for project in projects:
             self.assertIsInstance(project, Project)
 
