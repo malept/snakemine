@@ -18,6 +18,13 @@ from .. import conf
 from contextlib import contextmanager
 from copy import deepcopy
 import os
+import sys
+if sys.version_info < (2, 7):
+    from unittest2 import TestCase
+else:
+    from unittest import TestCase
+
+__all__ = ['test_environ', 'test_settings', 'TestCase']
 
 
 @contextmanager

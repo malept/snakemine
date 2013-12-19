@@ -14,12 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from . import test_environ, test_settings
+from . import test_environ, test_settings, TestCase
 import logging
 from logging.handlers import MemoryHandler
 from snakemine.conf import Settings
 from snakemine.issue import Issue
-from unittest import TestCase
 
 
 class SettingsTest(TestCase):
