@@ -117,7 +117,7 @@ fi
 RAILS_ENV=production script/server --daemon --binding=127.0.0.1
 # make sure the stupid server is ready to accept connections before running tests
 echo 'Waiting for Redmine to be responsive...'
-while [[ $(curl -q http://127.0.0.1:3000 2> /dev/null > /dev/null; echo $?) != 0 ]]; do
+while ! $(curl -sfo /dev/null http://127.0.0.1:3000); do
     echo -n .
     sleep 1
 done
@@ -126,12 +126,20 @@ echo
 echo 'Starting tests...'
 echo
 
+if $(which unit2 > /dev/null); then
+    UNITTEST=unit2
+    PY_UNITTEST=$UNITTEST
+else
+    UNITTEST="-m unittest"
+    PY_UNITTEST="python $UNITTEST"
+fi
+
 cd "$BASE_DIR"/..
 if [[ -n $RUN_COVERAGE ]]; then
-    PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" coverage run -m unittest discover
+    PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" coverage run $UNITTEST discover
     coverage report -m
 else
-    PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" python -m unittest discover
+    PYTHONPATH="$BASE_DIR" SNAKEMINE_SETTINGS_MODULE="test_settings" $PY_UNITTEST discover
 fi
 
 kill -9 `cat "$LOCAL_REDMINE_DIR"/tmp/pids/server.pid`
