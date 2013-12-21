@@ -14,7 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BASE_DIR="$(pwd)/$(dirname $0)"
+BASE_DIR="$(dirname $0)"
+if [[ "${BASE_DIR:0:1}" != "/" ]]; then
+    BASE_DIR="$(pwd)/$BASE_DIR"
+fi
 
 [[ -z "$DOWNLOAD_CACHE" ]] && DOWNLOAD_CACHE=/tmp
 
@@ -25,7 +28,7 @@ BASE_DIR="$(pwd)/$(dirname $0)"
 REDMINE_VERSION=1.0.4
 REDMINE_DIR=redmine-${REDMINE_VERSION}
 REDMINE_TGZ=${REDMINE_DIR}.tar.gz
-REDMINE_TGZ_URL=http://rubyforge.org/frs/download.php/73457/${REDMINE_TGZ}
+REDMINE_TGZ_URL=http://files.rubyforge.vm.bytemark.co.uk/redmine/${REDMINE_TGZ}
 REDMINE_SVN_URL=http://svn.redmine.org/redmine/tags/${REDMINE_VERSION}
 
 RACK_VERSION=1.0.1
@@ -34,7 +37,7 @@ RAILS_VERSION=2.3.5
 LOCAL_REDMINE_TGZ="$DOWNLOAD_CACHE/$REDMINE_TGZ"
 LOCAL_REDMINE_DIR="$UNZIP_DIR/$REDMINE_DIR"
 
-flake8 . || exit 1
+flake8 --exclude=.tox . || exit 1
 
 unpack_gem() {
     GEM_NAME="$1"

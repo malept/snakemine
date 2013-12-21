@@ -1,0 +1,5 @@
+include *.rst LICENSE* requirements*.txt *.cfg *.ini
+graft bin
+graft docs
+prune docs/_build
+recursive-include tests *.sh *.py *.yml
