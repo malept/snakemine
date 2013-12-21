@@ -93,6 +93,9 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
         fi
         tar -C "$UNZIP_DIR" -xf "$LOCAL_REDMINE_TGZ"
     fi
+    if ! $(gem list | grep -q sqlite3); then
+        gem install sqlite3 --no-ri --no-rdoc
+    fi
 
     cd "$LOCAL_REDMINE_DIR"
     # enable the REST API
@@ -103,7 +106,6 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
         gem install rake -v 0.8.7 --no-ri --no-rdoc
         gem install rails -v "$RAILS_VERSION" --no-ri --no-rdoc
         gem install rdoc --no-ri --no-rdoc
-        gem install sqlite3 --no-ri --no-rdoc
         sed -i -e 's@rake/rdoctask@rdoc/task@g' "$LOCAL_REDMINE_DIR"/Rakefile
     else
         # install one gem locally
