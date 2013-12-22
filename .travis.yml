@@ -4,7 +4,7 @@ python:
   - "2.6"
   - "pypy"
 before_install:
-  - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then sudo add-apt-repository --yes ppa:pypy; sudo apt-get update; sudo apt-get install pypy-dev; virtualenv --clear -p pypy ~/virtualenv/pypy; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then sudo add-apt-repository --yes ppa:pypy; sudo apt-get update; sudo apt-get install pypy-dev; deactivate; virtualenv --clear -p pypy ~/virtualenv/pypy; source ~/virtualenv/pypy/bin/activate; fi
 install:
   - pip install -r requirements-test.txt --use-mirrors
   - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then pip install -r requirements-2.6.txt; pip install unittest2 --use-mirrors; fi
