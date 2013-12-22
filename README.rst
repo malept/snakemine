@@ -2,7 +2,7 @@ Snakemine: A Pythonic interface to Redmine's REST API
 =====================================================
 
 This library is a REST API wrapper for the Redmine_ project management web
-application. Its API is directly inspired by Django's ORM.
+application. Its API is directly inspired by Django's settings module and ORM.
 
 .. _Redmine: http://www.redmine.org/
 
