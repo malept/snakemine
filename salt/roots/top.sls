@@ -3,3 +3,5 @@ base:
   '*':
     - ruby
     - virtualenv
+    - pypy
+    - deadsnakes
