@@ -42,6 +42,33 @@ mri-deps:
       - subversion
       - ruby
 
+install-old-rake:
+  module.wait:
+    - name: rvm.do
+    - ruby: 1.8.7
+    - command: "gem install rake -v 0.8.7 --no-ri --no-rdoc"
+    - runas: vagrant
+    - watch:
+      - module: rubygems-1.4.2
+
+remove-rubygems-bundler:
+  module.wait:
+    - name: rvm.do
+    - ruby: "1.8.7@global"
+    - command: "gem uninstall -x rubygems-bundler bundler bundler-unload rake"
+    - runas: vagrant
+    - watch:
+      - rvm: ruby-1.8.7
+
+rubygems-1.4.2:
+  module.wait:
+    - name: rvm.do
+    - ruby: 1.8.7
+    - command: "rvm rubygems 1.4.2"
+    - runas: vagrant
+    - watch:
+      - module: remove-rubygems-bundler
+
 ruby-1.8.7:
   rvm.installed:
     - default: True
