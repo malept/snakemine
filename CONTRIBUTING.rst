@@ -17,6 +17,11 @@ virtual machine::
 
     $ vagrant ssh
     vagrant@vagrant $ source .virtualenv/bin/activate
+    vagrant@vagrant $ git clone /vagrant ~/snakemine
+
+The last line exists so that it is possible to run ``python setup.py sdist`` -
+VirtualBox's remote filesystem module does not support hardlinks, so it fails
+if you try to run that command or ``tox`` from the ``/vagrant`` directory.
 
 .. _Vagrant: https://www.vagrantup.com
 .. _virtualenv: http://virtualenv.org/
