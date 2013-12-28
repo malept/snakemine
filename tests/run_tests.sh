@@ -58,6 +58,10 @@ unpack_gem() {
     )
 }
 
+install_gem() {
+    gem install --no-ri --no-rdoc "$@"
+}
+
 if [[ -z "$RVM_ALREADY_SET" ]]; then
     # Set the correct RVM ruby (1.8.7) if RVM is installed
     if $(which rvm > /dev/null); then
@@ -94,7 +98,7 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
         tar -C "$UNZIP_DIR" -xf "$LOCAL_REDMINE_TGZ"
     fi
     if ! $(gem list | grep -q sqlite3); then
-        gem install sqlite3 --no-ri --no-rdoc
+        install_gem sqlite3
     fi
 
     cd "$LOCAL_REDMINE_DIR"
@@ -103,9 +107,9 @@ if [[ -z "$NO_SETUP_NEEDED" ]]; then
     cp "$BASE_DIR"/database.yml "$LOCAL_REDMINE_DIR"/config/
     if [[ "$REDMINE_DOWNLOAD_METHOD" == "SVN" ]]; then
         # if redmine comes from SVN, install rails too
-        gem install rake -v 0.8.7 --no-ri --no-rdoc
-        gem install rails -v "$RAILS_VERSION" --no-ri --no-rdoc
-        gem install rdoc --no-ri --no-rdoc
+        install_gem rake -v 0.8.7
+        install_gem rails -v "$RAILS_VERSION"
+        install_gem rdoc
         sed -i -e 's@rake/rdoctask@rdoc/task@g' "$LOCAL_REDMINE_DIR"/Rakefile
     else
         # install one gem locally
