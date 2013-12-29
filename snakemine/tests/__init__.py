@@ -19,9 +19,9 @@ from contextlib import contextmanager
 from copy import deepcopy
 import os
 import sys
-if sys.version_info < (2, 7):
+if sys.version_info < (2, 7):  # pragma: no cover
     from unittest2 import TestCase
-else:
+else:  # pragma: no cover
     from unittest import TestCase
 
 __all__ = ['test_environ', 'test_settings', 'TestCase']
