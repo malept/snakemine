@@ -19,6 +19,7 @@ from __future__ import print_function
 from contextlib import contextmanager
 from functools import partial
 import os
+from random import randint
 import re
 import requests
 from shutil import copy, rmtree
@@ -49,7 +50,10 @@ RM_DOWNLOAD_METHOD = os.environ.get('REDMINE_DOWNLOAD_METHOD', 'TGZ')
 RM_VERSION = os.environ.get('REDMINE_VERSION', DEFAULT_RM_VERSION)
 RVM_NOT_SET = os.environ.get('RVM_ALREADY_SET') is None
 RM_SETUP_NEEDED = os.environ.get('NO_SETUP_NEEDED') is None
-RM_PORT = os.environ.get('REDMINE_PORT', '3000')
+if os.environ.get('REDMINE_PORT_RANDOM'):
+    RM_PORT = randint(3000, 65535)
+else:
+    RM_PORT = os.environ.get('REDMINE_PORT', '3000')
 RUN_COVERAGE = os.environ.get('RUN_COVERAGE')
 
 # REDMINE DATA
@@ -168,7 +172,7 @@ def code_coverage():
 
 # Logic
 
-run('flake8', '--exclude=.tox', BASE_DIR)
+run('flake8', '--exclude=.tox,build', BASE_DIR)
 
 if RVM_NOT_SET:
     # Set the correct RVM ruby (1.8.7) if RVM is installed
