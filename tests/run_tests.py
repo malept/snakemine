@@ -272,7 +272,7 @@ os.chdir(BASE_DIR)
 with code_coverage():
     test_suite = unittest.defaultTestLoader.discover(BASE_DIR)
     runner = unittest.TextTestRunner()
-    runner.run(test_suite)
+    result = runner.run(test_suite)
 
 pidfile = os.path.join(LOCAL_RM_DIR, 'tmp/pids/server.pid')
 if os.path.exists(pidfile):
@@ -280,3 +280,6 @@ if os.path.exists(pidfile):
     os.remove(pidfile)
 
 os.kill(pid, SIGKILL)
+
+if not result.wasSuccessful():
+    sys.exit(1)
