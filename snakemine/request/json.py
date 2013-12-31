@@ -50,7 +50,6 @@ class JSONEncoder(json.JSONEncoder):
     '''
 
     def default(self, obj):
-        print obj
         if isinstance(obj, date):
             return obj.strftime(DATE_FORMAT)
         elif isinstance(obj, datetime):

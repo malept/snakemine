@@ -20,6 +20,7 @@ HTTP Request handler using the JSON version of the API.
 '''
 
 from . import base
+from .._compat import items
 from ..response.xml import Response
 from lxml import etree, objectify
 
@@ -43,7 +44,7 @@ class Request(base.Request):
     def _send(self, method, path, params={}, data=None):
         if method in ('post', 'put') and data:
             obj = etree.Element(data['object'])
-            for k, v in data['data'].iteritems():
+            for k, v in items(data['data']):
                 attr = etree.SubElement(obj, k)
                 attr.text = str(v)
             data = etree.tostring(obj, xml_declaration=True)

@@ -26,6 +26,7 @@ There are two ways to set user-specific settings:
 .. moduleauthor:: Mark Lee <snakemine@lazymalevolence.com>
 '''
 
+from .._compat import items
 from .global_settings import DEFAULT_SETTINGS
 from copy import deepcopy
 from importlib import import_module
@@ -104,7 +105,7 @@ class Settings(object):
         self._user_settings.update(kwargs)
 
     def _set_from_module(self, module):
-        for k, v in vars(module).iteritems():
+        for k, v in items(vars(module)):
             if k.upper() == k:
                 self._user_settings[k] = v
 

@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from .. import conf
+from .._compat import items
 from contextlib import contextmanager
 from copy import deepcopy
 import os
@@ -41,7 +42,7 @@ def test_environ(**kwargs):
     of the test.
     '''
     old_environ = deepcopy(os.environ)
-    for k, v in kwargs.iteritems():
+    for k, v in items(kwargs):
         if k in os.environ and v is None:
             del os.environ[k]
         else:

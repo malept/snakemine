@@ -19,6 +19,7 @@ Base for Redmine models.
 .. moduleauthor:: Mark Lee <snakemine@lazymalevolence.com>
 '''
 
+from ._compat import items
 # This is XML because the JSON response doesn't send back enough info
 # For example, issue author metadata
 from .request.xml import Request
@@ -133,7 +134,7 @@ class Resource(object):
         else:
             # existing object
             self.objects.update(self.id, self._changed)
-            for k, v in self._changed.iteritems():
+            for k, v in items(self._changed):
                 setattr(self._response, k, v)
         self._changed = {}
 

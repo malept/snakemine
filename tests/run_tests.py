@@ -99,7 +99,7 @@ def run(*cmd, **kwargs):
         sys.stderr.write(msg)
         sys.exit(proc.returncode)
     if kwargs.get('stdout') == PIPE:
-        return stdout
+        return str(stdout)
     else:
         return proc.pid
 
@@ -231,7 +231,7 @@ config.action_controller.session = {
 
     run_with_rails('rake', 'generate_session_store', 'db:migrate',
                    'db:fixtures:load')
-    test_data = '''
+    test_data = b'''
 Token.create!(:action => "api", :user_id => 2, :value => "1234abcd")
 Issue.create!(:parent_issue_id => 1, :subject => "parent issue test",
               :tracker_id => 1, :project_id => 1,
