@@ -20,11 +20,17 @@ from copy import deepcopy
 import os
 import sys
 if sys.version_info < (2, 7):  # pragma: no cover
-    from unittest2 import TestCase
+    from unittest2 import TestCase as BaseTestCase
 else:  # pragma: no cover
-    from unittest import TestCase
+    from unittest import TestCase as BaseTestCase
 
 __all__ = ['test_environ', 'test_settings', 'TestCase']
+
+
+class TestCase(BaseTestCase):
+    def setUp(self):
+        os.environ['SNAKEMINE_SETTINGS_MODULE'] = 'test_settings'
+        conf.settings = conf.Settings(conf.DEFAULT_SETTINGS)
 
 
 @contextmanager

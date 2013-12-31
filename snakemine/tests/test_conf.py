@@ -17,6 +17,7 @@
 from . import test_environ, test_settings, TestCase
 import logging
 from logging.handlers import MemoryHandler
+import os
 from snakemine.conf import Settings
 from snakemine.issue import Issue
 
@@ -28,6 +29,11 @@ class SettingsTest(TestCase):
     def setUpClass(cls):
         logger = logging.getLogger('snakemine.conf')
         logger.addHandler(MemoryHandler(100))
+
+    def setUp(self):
+        super(SettingsTest, self).setUp()
+        port = os.environ.get('REDMINE_PORT', '3000')
+        self.host = 'http://127.0.0.1:{0}'.format(port)
 
     def test_unconfigured(self):
         settings = Settings({})
@@ -43,19 +49,19 @@ class SettingsTest(TestCase):
 
     def test_environ_var_valid_module(self):
         settings = Settings({})
-        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
-            self.assertEqual('jsmith', settings.USERNAME)
+        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings_module'):
+            self.assertEqual('test_settings_module', settings.USERNAME)
 
     def test_environ_var_valid_module_invalid_attr(self):
         settings = Settings({})
-        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
+        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings_module'):
             with self.assertRaises(AttributeError):
                 settings.foo
 
     def test_double_configure(self):
         settings = Settings({})
         self.assertFalse(settings.configured)
-        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings'):
+        with test_environ(SNAKEMINE_SETTINGS_MODULE='test_settings_module'):
             settings.configure()
             self.assertTrue(settings.configured)
             with self.assertRaises(RuntimeError):
@@ -71,9 +77,10 @@ class SettingsTest(TestCase):
             self.assertEqual('jschmidt', settings.USERNAME)
 
     def test_api_key(self):
-        with test_settings(USERNAME='jsmith', API_KEY='1234abcd'):
+        with test_settings(USERNAME='jsmith', API_KEY='1234abcd',
+                           BASE_URI=self.host):
             self.assertIsNotNone(Issue.objects.get(1))
 
     def test_no_auth(self):
-        with test_settings():
+        with test_settings(BASE_URI=self.host):
             self.assertIsNotNone(Issue.objects.get(1))

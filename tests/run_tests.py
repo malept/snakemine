@@ -267,6 +267,8 @@ print()
 
 sys.path.append(TEST_DIR)
 os.environ['SNAKEMINE_SETTINGS_MODULE'] = 'test_settings'
+if 'REDMINE_PORT' not in os.environ:
+    os.environ['REDMINE_PORT'] = str(RM_PORT)
 
 os.chdir(BASE_DIR)
 with code_coverage():
