@@ -31,9 +31,14 @@ class Manager(object):
     def __init__(self):
         self._request = Request()
 
+    @property
+    def _params(self):
+        return {}
+
     def _get(self, path=None, params={}):
         if not path:
             path = self._path
+        params.update(self._params)
         return [self._cls(data)
                 for data in self._request.get(path, params=params)[1]
                 if data]

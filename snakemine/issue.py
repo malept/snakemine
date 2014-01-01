@@ -35,6 +35,12 @@ class IssueManager(Manager):
     def _path(self):
         return '/issues'
 
+    @property
+    def _params(self):
+        return {
+            'include': 'journals',
+        }
+
 
 class Issue(Resource):
     '''A representation of a Redmine issue.'''
