@@ -11,7 +11,8 @@ Installation
 
 Install-time requirements:
 
-* Python 2.6 or 2.7
+* CPython 2.6 / 2.7 / 3.3 or PyPy (although PyPy is not currently tested on
+  Travis CI due to a strange bug, it is tested regularly via tox)
 * If you're using Python 2.6:
 
   * argparse_
