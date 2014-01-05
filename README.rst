@@ -69,4 +69,9 @@ You would run the script like so:
 License
 -------
 
-Apache License 2.0; see the ``LICENSE`` file for details.
+The code is licensed under the Apache License 2.0; see the ``LICENSE`` file
+for details.
+
+The documentation is licensed under the Creative Commons
+Attribution-ShareAlike 4.0 International License; see the ``LICENSE.docs``
+file for details.
