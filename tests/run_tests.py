@@ -117,6 +117,7 @@ ruby_version = RM_DEPS[RM_VERSION]['ruby']
 rvm_do = partial(rvm, ruby_version, 'do')
 
 gem = partial(rvm_do, 'gem')
+gem_list = partial(gem, 'list', stdout=PIPE)
 
 
 def gem_unpack(name, version, unpack_dir):
@@ -201,7 +202,7 @@ if RM_SETUP_NEEDED:
             print('Downloading Redmine {0}...'.format(RM_VERSION))
             run('wget', '-O', LOCAL_RM_TGZ, RM_TGZ_URL)
         run('tar', '-C', UNZIP_DIR, '-xf', LOCAL_RM_TGZ)
-    if 'sqlite3' not in gem('list', stdout=PIPE):
+    if 'sqlite3' not in gem_list():
         gem_install('sqlite3')
 
     os.chdir(LOCAL_RM_DIR)
@@ -213,11 +214,14 @@ if RM_SETUP_NEEDED:
 
     if RM_DOWNLOAD_METHOD == 'SVN':
         # if redmine comes from SVN, install rails too
+        if 'rake' in gem_list():
+            gem('uninstall', '-a', '-x', 'rake')
         gem_install('rake', '-v', '0.8.7')
         gem_install('rails', '-v', RM_DEPS[RM_VERSION]['rails'])
         gem_install('rdoc')
         replace_in_file('rake/rdoctask', 'rdoc/task',
                         os.path.join(LOCAL_RM_DIR, 'Rakefile'))
+        gem('list')
     else:
         gem_unpack('rack', RM_DEPS[RM_VERSION]['rack'],
                    os.path.join(LOCAL_RM_DIR, 'vendor/gems'))
