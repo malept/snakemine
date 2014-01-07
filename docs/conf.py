@@ -29,7 +29,7 @@ AUTHORS = u'Mark Lee'
 TITLE = u'Snakemine: Redmine API wrapper'
 LONG_TITLE = u'{0} Documentation'.format(TITLE)
 SUMMARY = snakemine.__description__
-SHORT_COPYRIGHT = u'2013, {0}. Some Rights Reserved.'.format(AUTHORS)
+SHORT_COPYRIGHT = u'2013, 2014, {0}. Some Rights Reserved.'.format(AUTHORS)
 COPYRIGHT = u'''{0}
 This work is licensed under a
 Creative Commons Attribution-ShareAlike 4.0
