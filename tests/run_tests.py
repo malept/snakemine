@@ -219,12 +219,12 @@ if RM_SETUP_NEEDED:
         gem_install('rake', '-v', '0.8.7')
         gem_install('rails', '-v', RM_DEPS[RM_VERSION]['rails'])
         gem_install('rdoc')
-        replace_in_file('rake/rdoctask', 'rdoc/task',
-                        os.path.join(LOCAL_RM_DIR, 'Rakefile'))
         gem('list')
     else:
         gem_unpack('rack', RM_DEPS[RM_VERSION]['rack'],
                    os.path.join(LOCAL_RM_DIR, 'vendor/gems'))
+    replace_in_file('rake/rdoctask', 'rdoc/task',
+                    os.path.join(LOCAL_RM_DIR, 'Rakefile'))
     if 'i18n' in RM_DEPS[RM_VERSION]:
         gem_install('i18n', '-v', '0.4.2')
 
