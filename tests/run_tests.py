@@ -17,6 +17,8 @@
 from __future__ import print_function
 
 from contextlib import contextmanager
+from flake8.engine import get_style_guide
+from flake8.main import print_report
 from functools import partial
 import os
 from random import randint
@@ -177,7 +179,13 @@ def code_coverage():
 
 # Logic
 
-run('flake8', '--exclude=.tox,build', BASE_DIR)
+## flake8
+flake8 = get_style_guide(exclude=['.tox', 'build'])
+report = flake8.check_files([BASE_DIR])
+
+exit_code = print_report(report, flake8)
+if exit_code > 0:
+    sys.exit(exit_code)
 
 if RVM_NOT_SET:
     # Set the correct RVM ruby (1.8.7) if RVM is installed
