@@ -49,12 +49,9 @@ except ImportError:
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(TEST_DIR)
 DEFAULT_RM_VERSION = '1.0.4'
-
-# ENVIRONMENT
-if os.environ.get('REDMINE_PORT_RANDOM'):
-    RM_PORT = randint(3000, 65535)
-else:
-    RM_PORT = os.environ.get('REDMINE_PORT', '3000')
+DEFAULT_PORT = 3000
+RAND_PORT_MIN = 3000
+RAND_PORT_MAX = 65535
 
 # REDMINE DATA
 RM_TGZ_FMT = 'http://files.rubyforge.vm.bytemark.co.uk/redmine/{0}'
@@ -98,6 +95,12 @@ def parse_args(prog, args):
     parser.add_argument('--redmine-download-method', default='TGZ',
                         choices=['TGZ', 'SVN'],
                         help='The method that the Redmine code is downloaded')
+    parser.add_argument('--redmine-port', type=int, default=DEFAULT_PORT,
+                        help='The TCP port Redmine will listen on')
+    parser.add_argument('--redmine-port-random', action='store_true',
+                        default=False,
+                        help='Randomly sets the Redmine TCP port '
+                             '(overrides --redmine-port)')
     parser.add_argument('--no-flake8', action='store_false', default=True,
                         dest='flake8', help='Disable Flake8 check')
     parser.add_argument('--check-rvm-ruby', action='store_true', default=False,
@@ -234,6 +237,11 @@ def run_flake8():
 def main(argv):
     args = parse_args(argv[0], argv[1:])
 
+    if args.redmine_port_random:
+        redmine_port = randint(RAND_PORT_MIN, RAND_PORT_MAX)
+    else:
+        redmine_port = args.redmine_port
+
     dep_versions = RM_DEPS[args.redmine_version]
     rvm = RVM(dep_versions['ruby'], args.download_cache)
 
@@ -311,14 +319,14 @@ Issue.create!(:parent_issue_id => 1, :subject => "parent issue test",
 
     # TODO convert into contextmanager
     pid = rvm.with_rails('script/server', '--daemon', '--binding=127.0.0.1',
-                         '--port={0}'.format(RM_PORT))
+                         '--port={0}'.format(redmine_port))
     # make sure the stupid server is ready to accept connections before
     # running tests
     print('Waiting for Redmine to be responsive...')
     redmine_responsive = False
     while not redmine_responsive:
         try:
-            r = requests.head('http://127.0.0.1:{0}'.format(RM_PORT))
+            r = requests.head('http://127.0.0.1:{0}'.format(redmine_port))
             if r.status_code == 200:
                 redmine_responsive = True
         except Exception:
@@ -334,7 +342,7 @@ Issue.create!(:parent_issue_id => 1, :subject => "parent issue test",
     sys.path.append(TEST_DIR)
     os.environ['SNAKEMINE_SETTINGS_MODULE'] = 'test_settings'
     if 'REDMINE_PORT' not in os.environ:
-        os.environ['REDMINE_PORT'] = str(RM_PORT)
+        os.environ['REDMINE_PORT'] = str(redmine_port)
 
     os.chdir(BASE_DIR)
     with code_coverage(args):
