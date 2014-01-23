@@ -203,6 +203,11 @@ def remove_installed_global_gems():
         f.write(global_gems)
 
 
+def append_to_file(filename, data):
+    with open(filename, 'a') as f:
+        f.write(data)
+
+
 def replace_in_file(search, replace, filename):
     with open(filename) as f:
         data = f.read()
@@ -293,14 +298,11 @@ def main(argv):
 
         prod_rb = os.path.join(local_redmine_dir,
                                'config/environments/production.rb')
-        # TODO convert into append_to_file
-        session_data = '''
+        append_to_file(prod_rb, '''
 config.action_controller.session = {
   :key => "_redmine_session",
   :secret => "31ea0a98608815189ee8118e6d6bbcbb",
-}'''
-        with open(prod_rb, 'a') as f:
-            f.write(session_data)
+}''')
 
         rvm.with_rails('rake', 'generate_session_store', 'db:migrate',
                        'db:fixtures:load')
