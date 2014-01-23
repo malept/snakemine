@@ -198,9 +198,11 @@ def remove_installed_global_gems():
     with write_global_gems() as f:
         f.write('\n'.join([l for l in global_gems.split('\n')
                            if 'bundler' not in l and 'rake' not in l]))
-    yield
-    with write_global_gems() as f:
-        f.write(global_gems)
+    try:
+        yield
+    finally:
+        with write_global_gems() as f:
+            f.write(global_gems)
 
 
 def append_to_file(filename, data):
@@ -225,11 +227,12 @@ def code_coverage(args):
         cov = coverage(config_file=os.path.join(BASE_DIR, '.coveragerc'))
         cov.start()
 
-    yield
-
-    if args.run_coverage and coverage:
-        cov.stop()
-        cov.report()
+    try:
+        yield
+    finally:
+        if args.run_coverage and coverage:
+            cov.stop()
+            cov.report()
 
 
 def run_flake8():
