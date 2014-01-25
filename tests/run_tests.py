@@ -220,34 +220,41 @@ def replace_in_file(search, replace, filename):
         f.write(data)
 
 
-@contextmanager
-def redmine_daemon(rvm, redmine_port, local_redmine_dir):
-    pid = rvm.with_rails('script/server', '--daemon', '--binding=127.0.0.1',
-                         '--port={0}'.format(redmine_port))
-    # make sure the stupid server is ready to accept connections before
-    # running tests
-    print('Waiting for Redmine to be responsive...')
-    redmine_responsive = False
-    while not redmine_responsive:
-        try:
-            r = requests.head('http://127.0.0.1:{0}'.format(redmine_port))
-            if r.status_code == 200:
-                redmine_responsive = True
-        except Exception:
-            pass
-        print('.', end='')
-        time.sleep(1)
-    print()
+class redmine_daemon(object):
+    '''Context manager for running a Redmine daemon.'''
 
-    try:
-        yield
-    finally:
-        pidfile = os.path.join(local_redmine_dir, 'tmp/pids/server.pid')
+    def __init__(self, rvm, redmine_port, local_redmine_dir):
+        self.rvm = rvm
+        self.port = redmine_port
+        self.local_redmine_dir = local_redmine_dir
+
+    def __enter__(self):
+        self.pid = self.rvm.with_rails('script/server', '--daemon',
+                                       '--binding=127.0.0.1',
+                                       '--port={0}'.format(self.port))
+        # make sure the stupid server is ready to accept connections before
+        # running tests
+        print('Waiting for Redmine to be responsive...')
+        redmine_responsive = False
+        while not redmine_responsive:
+            try:
+                r = requests.head('http://127.0.0.1:{0}'.format(self.port))
+                if r.status_code == 200:
+                    redmine_responsive = True
+            except Exception:
+                pass
+            print('.', end='')
+            time.sleep(1)
+        print()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pidfile = os.path.join(self.local_redmine_dir, 'tmp/pids/server.pid')
         if os.path.exists(pidfile):
-            pid = int(open(pidfile).read().strip())
+            self.pid = int(open(pidfile).read().strip())
             os.remove(pidfile)
 
-        os.kill(pid, SIGKILL)
+        if hasattr(self, 'pid'):
+            os.kill(self.pid, SIGKILL)
 
 
 @contextmanager
