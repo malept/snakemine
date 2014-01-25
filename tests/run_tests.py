@@ -221,6 +221,36 @@ def replace_in_file(search, replace, filename):
 
 
 @contextmanager
+def redmine_daemon(rvm, redmine_port, local_redmine_dir):
+    pid = rvm.with_rails('script/server', '--daemon', '--binding=127.0.0.1',
+                         '--port={0}'.format(redmine_port))
+    # make sure the stupid server is ready to accept connections before
+    # running tests
+    print('Waiting for Redmine to be responsive...')
+    redmine_responsive = False
+    while not redmine_responsive:
+        try:
+            r = requests.head('http://127.0.0.1:{0}'.format(redmine_port))
+            if r.status_code == 200:
+                redmine_responsive = True
+        except Exception:
+            pass
+        print('.', end='')
+        time.sleep(1)
+    print()
+
+    try:
+        yield
+    finally:
+        pidfile = os.path.join(local_redmine_dir, 'tmp/pids/server.pid')
+        if os.path.exists(pidfile):
+            pid = int(open(pidfile).read().strip())
+            os.remove(pidfile)
+
+        os.kill(pid, SIGKILL)
+
+
+@contextmanager
 def code_coverage(args):
     if args.run_coverage and coverage:
         print("Code coverage enabled.")
@@ -322,46 +352,21 @@ Issue.create!(:parent_issue_id => 1, :subject => "parent issue test",
     else:
         os.chdir(local_redmine_dir)
 
-    # TODO convert into contextmanager
-    pid = rvm.with_rails('script/server', '--daemon', '--binding=127.0.0.1',
-                         '--port={0}'.format(redmine_port))
-    # make sure the stupid server is ready to accept connections before
-    # running tests
-    print('Waiting for Redmine to be responsive...')
-    redmine_responsive = False
-    while not redmine_responsive:
-        try:
-            r = requests.head('http://127.0.0.1:{0}'.format(redmine_port))
-            if r.status_code == 200:
-                redmine_responsive = True
-        except Exception:
-            pass
-        print('.', end='')
-        time.sleep(1)
-    print()
+    with redmine_daemon(rvm, redmine_port, local_redmine_dir):
+        print()
+        print('Starting tests...')
+        print()
 
-    print()
-    print('Starting tests...')
-    print()
+        sys.path.append(TEST_DIR)
+        os.environ['SNAKEMINE_SETTINGS_MODULE'] = 'test_settings'
+        if 'REDMINE_PORT' not in os.environ:
+            os.environ['REDMINE_PORT'] = str(redmine_port)
 
-    sys.path.append(TEST_DIR)
-    os.environ['SNAKEMINE_SETTINGS_MODULE'] = 'test_settings'
-    if 'REDMINE_PORT' not in os.environ:
-        os.environ['REDMINE_PORT'] = str(redmine_port)
-
-    os.chdir(BASE_DIR)
-    with code_coverage(args):
-        test_suite = unittest.defaultTestLoader.discover(BASE_DIR)
-        runner = unittest.TextTestRunner()
-        result = runner.run(test_suite)
-
-    pidfile = os.path.join(local_redmine_dir, 'tmp/pids/server.pid')
-    if os.path.exists(pidfile):
-        pid = int(open(pidfile).read().strip())
-        os.remove(pidfile)
-
-    # TODO convert into contextmanager
-    os.kill(pid, SIGKILL)
+        os.chdir(BASE_DIR)
+        with code_coverage(args):
+            test_suite = unittest.defaultTestLoader.discover(BASE_DIR)
+            runner = unittest.TextTestRunner()
+            result = runner.run(test_suite)
 
     if not result.wasSuccessful():
         return 1
